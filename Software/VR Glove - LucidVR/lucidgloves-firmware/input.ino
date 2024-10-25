@@ -47,8 +47,8 @@ esp_adc_cal_characteristics_t *adc_chars;
 
 byte selectPins[] = {PINS_MUX_SELECT};
 
-int maxFingers[2* NUM_FINGERS] = {0,0,0,0,0,0,0,0,0,0};
-int minFingers[2* NUM_FINGERS] = {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX};
+int maxFingers[2* NUM_FINGERS] = {1943, 2129, 2128, 2062, 2206, 2077, 2252, 2276, 2235, 2236}; // {0,0,0,0,0,0,0,0,0,0}; // 
+int minFingers[2* NUM_FINGERS] = {1839, 1927, 1792, 1789, 1759, 1721, 2191, 2252, 2218, 2206}; // {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX}; // 
 int maxTravel[2*NUM_FINGERS] = {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX};
 #if FLEXION_MIXING == MIXING_SINCOS
   int sinMin[NUM_FINGERS] = {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX};
@@ -189,37 +189,42 @@ void getFingerPositions(bool calibrating, bool reset){
   #endif
 
   //reset max and mins as needed
-  if (reset){
-    for (int i = 0; i <2 * NUM_FINGERS; i++){
-      #if FLEXION_MIXING == MIXING_SINCOS
-      if (i < NUM_FINGERS)
-        totalOffset1[i] = 0;
-      #endif
-      maxFingers[i] = INT_MIN;
-      minFingers[i] = INT_MAX;
-    }
-  }
+                // if (reset){
+                //   for (int i = 0; i <2 * NUM_FINGERS; i++){
+                //     #if FLEXION_MIXING == MIXING_SINCOS
+                //     if (i < NUM_FINGERS)
+                //       totalOffset1[i] = 0;
+                //     #endif
+                //     maxFingers[i] = INT_MIN;
+                //     minFingers[i] = INT_MAX;
+                //   }
+                // }
   
   //if during the calibration sequence, make sure to update max and mins
-  if (calibrating){
-    for (int i = 0; i < 2*NUM_FINGERS; i++){
-      if (rawFingers[i] > maxFingers[i])
-        #if CLAMP_SENSORS
-          maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
-        #else
-          maxFingers[i] = rawFingers[i];
-          if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
-              minFingers[i] = maxFingers[i] - maxTravel[i];
-        #endif
-      if (rawFingers[i] < minFingers[i])
-        #if CLAMP_SENSORS
-          minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
-        #else
-          minFingers[i] = rawFingers[i];
-          if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
-              maxFingers[i] = minFingers[i] + maxTravel[i];
-        #endif
-    }
+                // if (calibrating){
+                //   for (int i = 0; i < 2*NUM_FINGERS; i++){
+                //     if (rawFingers[i] > maxFingers[i])
+                //       #if CLAMP_SENSORS
+                //         maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+                //       #else
+                //         maxFingers[i] = rawFingers[i];
+                //         if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
+                //             minFingers[i] = maxFingers[i] - maxTravel[i];
+                //       #endif
+                //     if (rawFingers[i] < minFingers[i])
+                //       #if CLAMP_SENSORS
+                //         minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+                //       #else
+                //         minFingers[i] = rawFingers[i];
+                //         if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
+                //             maxFingers[i] = minFingers[i] + maxTravel[i];
+                //       #endif
+                //   }
+                // }
+
+  // temp manual calibration
+  for (int i = 0; i < 2*NUM_FINGERS; i++){
+    maxTravel[i] =  maxFingers[i] - minFingers[i];
   }
   
   for (int i = 0; i < 2*NUM_FINGERS; i++){
@@ -389,10 +394,10 @@ void saveTravel()
 
 void saveIntermediate()
 {
-  prefs.putBytes("sinMax", (byte*)(&sinMax), sizeof(sinMax));
-  prefs.putBytes("sinMin", (byte*)(&sinMin), sizeof(sinMin));
-  prefs.putBytes("cosMax", (byte*)(&cosMax), sizeof(cosMax));
-  prefs.putBytes("cosMin", (byte*)(&cosMin), sizeof(cosMin));
+  // prefs.putBytes("sinMax", (byte*)(&sinMax), sizeof(sinMax));
+  // prefs.putBytes("sinMin", (byte*)(&sinMin), sizeof(sinMin));
+  // prefs.putBytes("cosMax", (byte*)(&cosMax), sizeof(cosMax));
+  // prefs.putBytes("cosMin", (byte*)(&cosMin), sizeof(cosMin));
 
   /*byte flags = EEPROM.read(0x00);
   flags |= 0x02;  // Set bit 1
@@ -460,10 +465,10 @@ void loadIntermediate()
 {
   if(prefs.getBytesLength("maxTravel") == 0 | prefs.getBytesLength("sinMin") == 0 | prefs.getBytesLength("cosMax") == 0 | prefs.getBytesLength("cosMin") == 0);
     return; // If clamping saved limits is not stored, do nothing  
-  prefs.getBytes("sinMax", &sinMax, sizeof(sinMax));
-  prefs.getBytes("sinMin", &sinMin, sizeof(sinMin));
-  prefs.getBytes("cosMax", &cosMax, sizeof(cosMax));
-  prefs.getBytes("cosMin", &cosMin, sizeof(cosMin));
+  // prefs.getBytes("sinMax", &sinMax, sizeof(sinMax));
+  // prefs.getBytes("sinMin", &sinMin, sizeof(sinMin));
+  // prefs.getBytes("cosMax", &cosMax, sizeof(cosMax));
+  // prefs.getBytes("cosMin", &cosMin, sizeof(cosMin));
 
   /*byte flags = EEPROM.read(0x00);
   if (!(flags & 0x02)) return; // If intermediate values saved flag is not set, do nothing

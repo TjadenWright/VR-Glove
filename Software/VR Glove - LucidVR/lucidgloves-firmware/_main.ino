@@ -154,7 +154,12 @@ void loop() {
 
     int fingerPosCopy[10];
     int mutexTimeDone;
-    bool menuButton = getButton(PIN_MENU_BTN) != INVERT_MENU;
+    bool menuButton = aButton && bButton; // getButton(PIN_MENU_BTN) != INVERT_MENU;
+
+    if(menuButton){
+      aButton = bButton = false;
+    }
+
     {
       #if ESP32_DUAL_CORE_SET
       int mutexTime = micros();
