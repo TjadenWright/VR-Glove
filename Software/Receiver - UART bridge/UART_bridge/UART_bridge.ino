@@ -10,7 +10,7 @@
 
 #include <NimBLEDevice.h>
 
-#define GLOVENAME "lucidgloves-right"
+#define GLOVENAME "lucidgloves-left"
 #define LED 2
 //#define _DEBUG //Uncomment to turn on debug messages
 
