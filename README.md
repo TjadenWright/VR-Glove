@@ -5,4 +5,4 @@
 
 # Electrical [here](https://github.com/TjadenWright/VR-Glove/tree/main/Hardware/Electrical/README.md)
 
-# Software [here]((https://github.com/TjadenWright/VR-Glove/tree/main/Software/README.md))
+# Software [here](https://github.com/TjadenWright/VR-Glove/tree/main/Software/README.md)
