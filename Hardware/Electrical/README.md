@@ -5,7 +5,7 @@
 
 ## Battery Pack
 * For the battery circuit I used [this](https://docs.slimevr.dev/diy/tracker-schematics.html).
-* For my specific ESP32 I needed to use a [boost converter](https://www.amazon.com/gp/product/B07L76KLRY/ref=ox_sc_act_title_3?smid=A1IU4FC9F8Y7P1&psc=1) to boost the batteries 3.7v to 5v.
+* For my specific ESP32 I needed to use a [boost converter](https://www.amazon.com/gp/product/B07L76KLRY/ref=ox_sc_act_title_3?smid=A1IU4FC9F8Y7P1&psc=1) to boost the batteries 3.7v to 5v. Do this on the wires going to the ESP32 (or the output of the TP4056).
 <img src="https://github.com/TjadenWright/VR-Glove/blob/main/Images%20And%20Videos/ChargeCircuit.png" alt="Charge Circuit" title="Charge Circuit" />
 
 # Parts List
