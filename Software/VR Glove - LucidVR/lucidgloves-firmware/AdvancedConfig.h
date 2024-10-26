@@ -51,7 +51,7 @@
 
 // You must install RunningMedian library to use this feature
 // https://www.arduino.cc/reference/en/libraries/runningmedian/
-#define ENABLE_MEDIAN_FILTER true //use the median of the previous values, helps reduce noise
+#define ENABLE_MEDIAN_FILTER false //use the median of the previous values, helps reduce noise
 #define MEDIAN_SAMPLES 10
 
 //intermediate filtering. Options are INTERFILTER_NONE, INTERFILTER_LIMITS (filter is only used for limit calib), INTERFILTER_ALL (filter all the way)

@@ -5,7 +5,7 @@
 Preferences prefs;
 
 // Requires RunningMedian library by Rob Tillaart
-#if (ENABLE_MEDIAN_FILTER || ((INTERFILTER_MODE != INTERFILTER_NONE) && (FLEXION_MIXING != MIXING_NONE)))
+#if (ENABLE_MEDIAN_FILTER || ((INTERFILTER_MODE != INTERFILTER_NONE) && (FLEXION_MIXING != MIXING_NONE)) || (INTERFILTER_MODE == INTERFILTER_LIMITS))
   #include <RunningMedian.h>
 #endif
 
@@ -41,6 +41,22 @@ Preferences prefs;
       RunningMedian(INTERFILTER_SAMPLES)
   };
 #endif
+
+#if ((INTERFILTER_MODE == INTERFILTER_LIMITS) || (INTERFILTER_MODE == INTERFILTER_ALL))
+  RunningMedian calibSamples[2* NUM_FINGERS] = {
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES)
+  };
+#endif
+
 
 #define DEFAULT_VREF 1100
 esp_adc_cal_characteristics_t *adc_chars;
@@ -154,6 +170,7 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
   #endif
 
   int rawFingers[2 * NUM_FINGERS];
+  int rawFingersCalib[2 * NUM_FINGERS];
 
   #if USING_SPLAY
     int rawFingersSplay[NUM_FINGERS] = {NO_THUMB?0:analogPinRead(PIN_THUMB_SPLAY), 
@@ -188,7 +205,13 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
   
   #if ENABLE_MEDIAN_FILTER
   for (int i = 0; i < 2 * NUM_FINGERS; i++){
-    rmSamples[i].add( rawFingers[i] );
+    #if CLAMP_SENSORS_DISCARD
+      if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
+        rmSamples[i].add( rawFingers[i] );
+      }
+    #else
+      rmSamples[i].add( rawFingers[i] );
+    #endif
     rawFingers[i] = rmSamples[i].getMedian();
   }
   #endif
@@ -216,29 +239,46 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
   
   //if during the calibration sequence, make sure to update max and mins
   if (calibrating){
+    // new array just for calibration
+    for (int i = 0; i < 2 * NUM_FINGERS; i++){
+      rawFingersCalib[i] = rawFingers[i];
+    }
+    // do we need to filter?
+    #if ((INTERFILTER_MODE == INTERFILTER_LIMITS) || (INTERFILTER_MODE == INTERFILTER_ALL))
+      for (int i = 0; i < 2 * NUM_FINGERS; i++){
+        #if CLAMP_SENSORS_DISCARD
+          if(rawFingersCalib[i] < CLAMP_MAX && rawFingersCalib[i] > CLAMP_MIN){
+            calibSamples[i].add( rawFingersCalib[i] );
+          }
+        #else
+        calibSamples[i].add( rawFingersCalib[i] );
+        #endif
+        rawFingersCalib[i] = calibSamples[i].getMedian();
+      }
+    #endif
     if(flexion){
       for (int i = 0; i < NUM_FINGERS; i++){
-        if (rawFingers[i] > maxFingers[i])
+        if (rawFingersCalib[i] > maxFingers[i])
           #if CLAMP_SENSORS
-            maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+            maxFingers[i] = ( rawFingersCalib[i] <= CLAMP_MAX )? rawFingersCalib[i] : CLAMP_MAX;
           #elif CLAMP_SENSORS_DISCARD
-            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
-              maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+            if(rawFingersCalib[i] < CLAMP_MAX && rawFingersCalib[i] > CLAMP_MIN){
+              maxFingers[i] = ( rawFingersCalib[i] <= CLAMP_MAX )? rawFingersCalib[i] : CLAMP_MAX;
             }
           #else
-            maxFingers[i] = rawFingers[i];
+            maxFingers[i] = rawFingersCalib[i];
             if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
                 minFingers[i] = maxFingers[i] - maxTravel[i];
           #endif
-        if (rawFingers[i] < minFingers[i])
+        if (rawFingersCalib[i] < minFingers[i])
           #if CLAMP_SENSORS
-            minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+            minFingers[i] = ( rawFingersCalib[i] >= CLAMP_MIN )? rawFingersCalib[i] : CLAMP_MIN;
           #elif CLAMP_SENSORS_DISCARD
-            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
-              minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+            if(rawFingers[i] < CLAMP_MAX && rawFingersCalib[i] > CLAMP_MIN){
+              minFingers[i] = ( rawFingersCalib[i] >= CLAMP_MIN )? rawFingersCalib[i] : CLAMP_MIN;
             }
           #else
-            minFingers[i] = rawFingers[i];
+            minFingers[i] = rawFingersCalib[i];
             if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
                 maxFingers[i] = minFingers[i] + maxTravel[i];
           #endif
@@ -247,27 +287,27 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
 
     if(splay){
       for (int i = NUM_FINGERS; i < 2*NUM_FINGERS; i++){
-        if (rawFingers[i] > maxFingers[i])
+        if (rawFingersCalib[i] > maxFingers[i])
           #if CLAMP_SENSORS
-            maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+            maxFingers[i] = ( rawFingersCalib[i] <= CLAMP_MAX )? rawFingersCalib[i] : CLAMP_MAX;
           #elif CLAMP_SENSORS_DISCARD
-            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
-              maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+            if(rawFingersCalib[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
+              maxFingers[i] = ( rawFingersCalib[i] <= CLAMP_MAX )? rawFingersCalib[i] : CLAMP_MAX;
             }
           #else
-            maxFingers[i] = rawFingers[i];
+            maxFingers[i] = rawFingersCalib[i];
             if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
                 minFingers[i] = maxFingers[i] - maxTravel[i];
           #endif
-        if (rawFingers[i] < minFingers[i])
+        if (rawFingersCalib[i] < minFingers[i])
           #if CLAMP_SENSORS
-            minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+            minFingers[i] = ( rawFingersCalib[i] >= CLAMP_MIN )? rawFingersCalib[i] : CLAMP_MIN;
           #elif CLAMP_SENSORS_DISCARD
-            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
-              minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+            if(rawFingersCalib[i] < CLAMP_MAX && rawFingersCalib[i] > CLAMP_MIN){
+              minFingers[i] = ( rawFingersCalib[i] >= CLAMP_MIN )? rawFingersCalib[i] : CLAMP_MIN;
             }
           #else
-            minFingers[i] = rawFingers[i];
+            minFingers[i] = rawFingersCalib[i];
             if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
                 maxFingers[i] = minFingers[i] + maxTravel[i];
           #endif
