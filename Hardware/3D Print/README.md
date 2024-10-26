@@ -17,3 +17,8 @@
 * The STL can be viewed [here](https://github.com/TjadenWright/VR-Glove/blob/main/Hardware/3D%20Print/STLs/Base%20Glove%20+%20Joystick/baseGloveAndJoystick%20v1.stl).
 * The 3D printing parts list can be viewed [here](https://github.com/TjadenWright/VR-Glove/blob/main/Hardware/3D%20Print/STLs/Base%20Glove%20+%20Joystick/README.md).
 * Need to add a pic*
+
+# Receiver For BLE Communication
+* You can use BTSERIAL for communication (This doesn't require a receiver), but I found that to have high latency compared to BLE.
+* The case I used was [this](https://www.thingiverse.com/thing:3853287).
+<img src="https://github.com/TjadenWright/VR-Glove/blob/main/Images%20And%20Videos/receiver.png" alt="Reciever" title="Reciever" />
