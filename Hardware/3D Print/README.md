@@ -21,4 +21,4 @@
 # Receiver For BLE Communication
 * You can use BTSERIAL for communication (This doesn't require a receiver), but I found that to have high latency compared to BLE.
 * The case I used was [this](https://www.thingiverse.com/thing:3853287).
-<img src="https://github.com/TjadenWright/VR-Glove/blob/main/Images%20And%20Videos/receiver.png" alt="Reciever" title="Reciever" />
+<img src="https://github.com/TjadenWright/VR-Glove/blob/main/Images%20And%20Videos/Receiver.jpg" alt="Reciever" title="Reciever" />

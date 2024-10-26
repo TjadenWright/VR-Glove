@@ -4,7 +4,7 @@
 
 # Program the Receiver 
 * Open [this file](https://github.com/TjadenWright/VR-Glove/blob/main/Software/Receiver%20-%20UART%20bridge/UART_bridge/UART_bridge.ino) in Arduino and program that to the receiver arduino.
-<img src="https://github.com/TjadenWright/VR-Glove/blob/main/Images%20And%20Videos/receiver.png" alt="Reciever" title="Reciever" />
+<img src="https://github.com/TjadenWright/VR-Glove/blob/main/Images%20And%20Videos/Receiver.jpg" alt="Reciever" title="Reciever" />
 
 # References:
 * https://github.com/DieKatzchen/lucidgloves/tree/proto5
