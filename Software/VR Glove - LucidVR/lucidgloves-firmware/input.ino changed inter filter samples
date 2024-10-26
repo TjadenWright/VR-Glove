@@ -44,16 +44,16 @@ Preferences prefs;
 
 #if ((INTERFILTER_MODE == INTERFILTER_LIMITS) || (INTERFILTER_MODE == INTERFILTER_ALL))
   RunningMedian calibSamples[2* NUM_FINGERS] = {
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES),
-      RunningMedian(MEDIAN_SAMPLES)
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES),
+      RunningMedian(INTERFILTER_SAMPLES)
   };
 #endif
 
