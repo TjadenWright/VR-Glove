@@ -47,8 +47,8 @@ esp_adc_cal_characteristics_t *adc_chars;
 
 byte selectPins[] = {PINS_MUX_SELECT};
 
-int maxFingers[2* NUM_FINGERS] = {1943, 2129, 2128, 2062, 2206, 2077, 2252, 2276, 2235, 2236}; // {0,0,0,0,0,0,0,0,0,0}; // 
-int minFingers[2* NUM_FINGERS] = {1839, 1927, 1792, 1789, 1759, 1721, 2191, 2252, 2218, 2206}; // {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX}; // 
+int maxFingers[2* NUM_FINGERS] = {0,0,0,0,0,0,0,0,0,0}; // {1943, 2129, 2128, 2062, 2206, 2077, 2252, 2276, 2235, 2236};
+int minFingers[2* NUM_FINGERS] = {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX}; // {1839, 1927, 1792, 1789, 1759, 1721, 2191, 2252, 2218, 2206};
 int maxTravel[2*NUM_FINGERS] = {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX};
 #if FLEXION_MIXING == MIXING_SINCOS
   int sinMin[NUM_FINGERS] = {ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX, ANALOG_MAX};
@@ -99,6 +99,11 @@ void setupInputs(){
   pinMode(PIN_CALIB, INPUT_PULLUP);
   #endif
 
+  #if USING_TWO_CALIB_PINS
+  pinMode(PIN_CALIB_FLEX, INPUT_PULLUP);
+  pinMode(PIN_CALIB_SPLAY, INPUT_PULLUP);
+  #endif
+
   #if USING_MULTIPLEXER
   byte selectPins[] = {PINS_MUX_SELECT};
   //pinMode(MUX_INPUT, INPUT);
@@ -135,7 +140,7 @@ int readMux(byte pin){
 #endif
 
 int targetSinMin, targetSinMax, targetSinCurrent, targetCosMin, targetCosMax, targetCosCurrent, targetFlexionMin, targetFlexionMax, targetFlexionCurrent, targetMaxTravel, targetProcessed;
-void getFingerPositions(bool calibrating, bool reset){
+void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
   #if FLEXION_MIXING == MIXING_NONE //no mixing, just linear
   int rawFingersFlexion[NUM_FINGERS] = {NO_THUMB?0:analogPinRead(PIN_THUMB), analogPinRead(PIN_INDEX), analogPinRead(PIN_MIDDLE), analogPinRead(PIN_RING), analogPinRead(PIN_PINKY)};
   
@@ -189,42 +194,85 @@ void getFingerPositions(bool calibrating, bool reset){
   #endif
 
   //reset max and mins as needed
-                // if (reset){
-                //   for (int i = 0; i <2 * NUM_FINGERS; i++){
-                //     #if FLEXION_MIXING == MIXING_SINCOS
-                //     if (i < NUM_FINGERS)
-                //       totalOffset1[i] = 0;
-                //     #endif
-                //     maxFingers[i] = INT_MIN;
-                //     minFingers[i] = INT_MAX;
-                //   }
-                // }
+  if (reset){
+    if (flexion){
+      for (int i = 0; i <NUM_FINGERS; i++){
+        #if FLEXION_MIXING == MIXING_SINCOS
+        if (i < NUM_FINGERS)
+          totalOffset1[i] = 0;
+        #endif
+        maxFingers[i] = 0;
+        minFingers[i] = ANALOG_MAX;
+      }
+    }
+
+    if (splay){
+      for (int i = NUM_FINGERS; i <2*NUM_FINGERS; i++){
+        maxFingers[i] = 0;
+        minFingers[i] = ANALOG_MAX;
+      }
+    }
+  }
   
   //if during the calibration sequence, make sure to update max and mins
-                // if (calibrating){
-                //   for (int i = 0; i < 2*NUM_FINGERS; i++){
-                //     if (rawFingers[i] > maxFingers[i])
-                //       #if CLAMP_SENSORS
-                //         maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
-                //       #else
-                //         maxFingers[i] = rawFingers[i];
-                //         if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
-                //             minFingers[i] = maxFingers[i] - maxTravel[i];
-                //       #endif
-                //     if (rawFingers[i] < minFingers[i])
-                //       #if CLAMP_SENSORS
-                //         minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
-                //       #else
-                //         minFingers[i] = rawFingers[i];
-                //         if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
-                //             maxFingers[i] = minFingers[i] + maxTravel[i];
-                //       #endif
-                //   }
-                // }
+  if (calibrating){
+    if(flexion){
+      for (int i = 0; i < NUM_FINGERS; i++){
+        if (rawFingers[i] > maxFingers[i])
+          #if CLAMP_SENSORS
+            maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+          #elif CLAMP_SENSORS_DISCARD
+            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
+              maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+            }
+          #else
+            maxFingers[i] = rawFingers[i];
+            if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
+                minFingers[i] = maxFingers[i] - maxTravel[i];
+          #endif
+        if (rawFingers[i] < minFingers[i])
+          #if CLAMP_SENSORS
+            minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+          #elif CLAMP_SENSORS_DISCARD
+            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
+              minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+            }
+          #else
+            minFingers[i] = rawFingers[i];
+            if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
+                maxFingers[i] = minFingers[i] + maxTravel[i];
+          #endif
+      }
+    }
 
-  // temp manual calibration
-  for (int i = 0; i < 2*NUM_FINGERS; i++){
-    maxTravel[i] =  maxFingers[i] - minFingers[i];
+    if(splay){
+      for (int i = NUM_FINGERS; i < 2*NUM_FINGERS; i++){
+        if (rawFingers[i] > maxFingers[i])
+          #if CLAMP_SENSORS
+            maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+          #elif CLAMP_SENSORS_DISCARD
+            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
+              maxFingers[i] = ( rawFingers[i] <= CLAMP_MAX )? rawFingers[i] : CLAMP_MAX;
+            }
+          #else
+            maxFingers[i] = rawFingers[i];
+            if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
+                minFingers[i] = maxFingers[i] - maxTravel[i];
+          #endif
+        if (rawFingers[i] < minFingers[i])
+          #if CLAMP_SENSORS
+            minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+          #elif CLAMP_SENSORS_DISCARD
+            if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
+              minFingers[i] = ( rawFingers[i] >= CLAMP_MIN )? rawFingers[i] : CLAMP_MIN;
+            }
+          #else
+            minFingers[i] = rawFingers[i];
+            if (savedTravel && (maxFingers[i] - minFingers[i] > maxTravel[i]))
+                maxFingers[i] = minFingers[i] + maxTravel[i];
+          #endif
+      }
+    }
   }
   
   for (int i = 0; i < 2*NUM_FINGERS; i++){
@@ -235,7 +283,14 @@ void getFingerPositions(bool calibrating, bool reset){
     targetMaxTravel = maxTravel[i];
   }
     if (minFingers[i] != maxFingers[i]){
+      #if !CLAMP_SENSORS_DISCARD
       fingerPos[i] = map( rawFingers[i], minFingers[i], maxFingers[i], 0, ANALOG_MAX );
+      #else
+      // for clamp discard, you can not set finger pose if not right since it's passed by reference.
+      if(rawFingers[i] < CLAMP_MAX && rawFingers[i] > CLAMP_MIN){
+        fingerPos[i] = map( rawFingers[i], minFingers[i], maxFingers[i], 0, ANALOG_MAX );
+      }
+      #endif
       if (i == target)
         targetProcessed = fingerPos[i];
       #if CLAMP_ANALOG_MAP
@@ -250,6 +305,15 @@ void getFingerPositions(bool calibrating, bool reset){
     }
     
   }
+
+  /*
+  Serial.println("-----------------------------------------------------------------------------------------------------------------");
+  Serial.print("min thumb: "); Serial.print(minFingers[0]); Serial.print(" min pointer: "); Serial.print(minFingers[1]); Serial.print(" min middle: "); Serial.print(minFingers[2]); Serial.print(" min index: "); Serial.print(minFingers[3]); Serial.print(" min pinky: "); Serial.println(minFingers[4]);
+  Serial.print("max thumb: "); Serial.print(maxFingers[0]); Serial.print(" max pointer: "); Serial.print(maxFingers[1]); Serial.print(" max middle: "); Serial.print(maxFingers[2]); Serial.print(" max index: "); Serial.print(maxFingers[3]); Serial.print(" max pinky: "); Serial.println(maxFingers[4]);
+  Serial.println("-----------------------------------------------------------------------------------------------------------------");
+  Serial.print("thumb: "); Serial.print(rawFingersFlexion[0]); Serial.print(" pointer: "); Serial.print(rawFingersFlexion[1]); Serial.print(" middle: "); Serial.print(rawFingersFlexion[2]); Serial.print(" index: "); Serial.print(rawFingersFlexion[3]); Serial.print(" pinky: "); Serial.println(rawFingersFlexion[4]);
+  */
+  
   /*
   Serial.print(target);
   Serial.print(" ");

@@ -8,6 +8,17 @@
 
 bool calibrate = false;
 bool calibButton = false;
+#if USING_TWO_CALIB_PINS
+bool flexionCalib = false;
+bool splayCalib = false;
+bool calibFlex = false;
+bool calibFlexPrev = false;
+bool calibSplay = false;
+bool calibSplayPrev = false;
+#else
+bool flexionCalib = true;
+bool splayCalib = true;
+#endif
 int* fingerPos = (int[]){0,0,0,0,0,0,0,0,0,0};
 
 ICommunication* comm;
@@ -29,7 +40,7 @@ void getInputs(void* parameter){
       {
         fingerPosLock->lock();
         totalLocks++;
-        getFingerPositions(calibrate, calibButton); //Save finger positions in thread
+        getFingerPositions(calibrate, calibButton, flexionCalib, splayCalib); //Save finger positions in thread
 
         fingerPosLock->unlock();
       }
@@ -107,27 +118,63 @@ void loop() {
     latch = false;
   
   if (comm->isOpen()){
-    #if USING_CALIB_PIN
-    calibButton = getButton(PIN_CALIB) != INVERT_CALIB;
-    //Serial.println(getButton(PIN_CALIB));
-    if (calibButton)
-      loops = 0;
+    #if !USING_TWO_CALIB_PINS
+      #if USING_CALIB_PIN
+      calibButton = getButton(PIN_CALIB) != INVERT_CALIB;
+      //Serial.println(getButton(PIN_CALIB));
+      if (calibButton)
+        loops = 0;
+      #else
+      calibButton = false;
+      #endif
+
+      //bool calibrate = false;
+      if (loops < CALIBRATION_LOOPS || ALWAYS_CALIBRATING){
+        calibrate = true;
+        loops++;
+      }
+      else{
+        calibrate = false;
+      }
     #else
-    calibButton = false;
+      // setup previous vals
+      calibFlexPrev = calibFlex;
+      calibSplayPrev = calibSplay;
+      // get new vals
+      calibFlex = getButton(PIN_CALIB_FLEX) != INVERT_CALIB_FLEX;
+      calibSplay = getButton(PIN_CALIB_SPLAY) != INVERT_CALIB_SPLAY;
+      
+      // calibration button setup
+      if(((calibFlex != calibFlexPrev) && (calibFlexPrev = 0)) || ((calibSplay != calibSplayPrev) && (calibSplayPrev = 0))){
+        // if one of the buttons was just pressed set reset mode
+        calibButton = true;  // reset
+        calibrate = false;   // don't calibrate quite yet
+      }
+      else if(calibFlex || calibSplay){
+        calibButton = false;  // don't reset
+        calibrate = true;   // calibrate
+      }
+      else{
+        calibButton = false;  // don't reset
+        calibrate = false;   // don't calibrate
+      }
+
+      if(calibSplay){
+        flexionCalib = false; // not flexion mode
+        splayCalib = true;  // splay mode
+      }
+      else if(calibFlex){
+        flexionCalib = true; // flexion mode
+        splayCalib = false;  // not splay mode
+      }
+      else{
+        flexionCalib = false; // not flexion mode
+        splayCalib = false;  // not splay mode
+      }
     #endif
 
-
-    //bool calibrate = false;
-    if (loops < CALIBRATION_LOOPS || ALWAYS_CALIBRATING){
-      calibrate = true;
-      loops++;
-    }
-    else{
-      calibrate = false;
-    }
-
     #if !ESP32_DUAL_CORE_SET
-      getFingerPositions(calibrate, calibButton);
+      getFingerPositions(calibrate, calibButton, flexionCalib, splayCalib);
     #endif
     bool joyButton = getButton(PIN_JOY_BTN) != INVERT_JOY;
 
@@ -154,11 +201,15 @@ void loop() {
 
     int fingerPosCopy[10];
     int mutexTimeDone;
-    bool menuButton = aButton && bButton; // getButton(PIN_MENU_BTN) != INVERT_MENU;
-
+    
+    #if MENU_BUTTON_AB
+    bool menuButton = aButton && bButton; // set menu to a + b
     if(menuButton){
-      aButton = bButton = false;
+      aButton = bButton = false;  // set a and b to false if menu is true.
     }
+    #else
+    bool menuButton =  getButton(PIN_MENU_BTN) != INVERT_MENU;
+    #endif
 
     {
       #if ESP32_DUAL_CORE_SET
@@ -176,7 +227,6 @@ void loop() {
       #endif
       
     }
-
     comm->output(encode(fingerPosCopy, getJoyX(), getJoyY(), joyButton, triggerButton, aButton, bButton, grabButton, pinchButton, calibButton, menuButton));
     #if USING_FORCE_FEEDBACK
       char received[100];

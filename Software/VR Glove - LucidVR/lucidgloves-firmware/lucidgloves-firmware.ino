@@ -25,7 +25,6 @@
 #define FLIP_FLEXION  false  //Flip values from potentiometers (for fingers!) if they are backwards
 #define FLIP_SPLAY true //Flip values for splay
 
-
 //Gesture enables, make false to use button override
 #define TRIGGER_GESTURE true
 #define GRAB_GESTURE    true
@@ -40,7 +39,10 @@
 #define INVERT_B false
 #define INVERT_JOY false
 #define INVERT_MENU false
+#define MENU_BUTTON_AB true // makes A + B button the menu button
 #define INVERT_CALIB false
+#define INVERT_CALIB_FLEX true
+#define INVERT_CALIB_SPLAY false
 //These only apply with gesture button override:
 #define INVERT_TRIGGER false
 #define INVERT_GRAB false
@@ -55,7 +57,8 @@
 
 #define NO_THUMB false //If for some reason you don't want to track the thumb
 
-#define USING_CALIB_PIN false //When PIN_CALIB is shorted (or it's button pushed) it will reset calibration if this is on.
+#define USING_CALIB_PIN false     //When PIN_CALIB is shorted (or it's button pushed) it will reset calibration if this is on.
+#define USING_TWO_CALIB_PINS true // one calib pin for splay and flexion
 
 #define USING_FORCE_FEEDBACK false //Force feedback haptics allow you to feel the solid objects you hold
 #define FLIP_FORCE_FEEDBACK true
@@ -78,6 +81,8 @@
   #define PIN_GRAB_BTN  21 //unused if gesture set
   #define PIN_PNCH_BTN  21 //unused if gesture set
   #define PIN_CALIB     21 //button for recalibration (You can set this to GPIO0 to use the BOOT button, but only when using Bluetooth.)
+  #define PIN_CALIB_FLEX  22
+  #define PIN_CALIB_SPLAY 23
   #define DEBUG_LED 2
   #define PIN_PINKY_MOTOR     16  //used for force feedback
   #define PIN_RING_MOTOR      16 //^
