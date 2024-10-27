@@ -9,10 +9,10 @@
 #define NUM_FINGERS 5
 
 //Bluetooth advaned settings
-#define BT_ECHO false//Should the bluetooth data be echoed over serial for debugging
+#define BT_ECHO true//Should the bluetooth data be echoed over serial for debugging
 
 //ESP32 Specific Settings
-#define ESP32_DUAL_CORE true //Should inputs be handled on a separate core for communication for more accurate rotation counting
+#define ESP32_DUAL_CORE false //Should inputs be handled on a separate core for communication for more accurate rotation counting
 
 //Finger indeces (not used for legacy)
 #define PINKY_IND 4
@@ -51,12 +51,12 @@
 
 // You must install RunningMedian library to use this feature
 // https://www.arduino.cc/reference/en/libraries/runningmedian/
-#define ENABLE_MEDIAN_FILTER false //use the median of the previous values, helps reduce noise
-#define MEDIAN_SAMPLES 10
+#define ENABLE_MEDIAN_FILTER true //use the median of the previous values, helps reduce noise
+#define MEDIAN_SAMPLES 30
 
 //intermediate filtering. Options are INTERFILTER_NONE, INTERFILTER_LIMITS (filter is only used for limit calib), INTERFILTER_ALL (filter all the way)
 #define INTERFILTER_MODE INTERFILTER_LIMITS
-#define INTERFILTER_SAMPLES 10
+#define INTERFILTER_SAMPLES 100
 
 //ESP dual core hardware check
 #if defined(ESP32) && ESP32_DUAL_CORE
