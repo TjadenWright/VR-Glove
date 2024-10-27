@@ -6,3 +6,4 @@
 # Electrical [here](https://github.com/TjadenWright/VR-Glove/tree/main/Hardware/Electrical/README.md)
 
 # Software [here](https://github.com/TjadenWright/VR-Glove/tree/main/Software/README.md)
+* UWB findings [here](https://github.com/TjadenWright/VR-Glove/blob/main/Software/UWB%20VR%20Glove%20Communication/README.md)
