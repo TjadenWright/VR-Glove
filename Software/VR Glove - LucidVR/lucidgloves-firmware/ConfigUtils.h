@@ -45,6 +45,7 @@ public:
 #define COMM_SERIAL 0   
 #define COMM_BTSERIAL 1 
 #define COMM_BLESERIAL 2 
+#define COMM_UWBSERIAL 3
 
 //Encode
 #define ENCODE_LEGACY 0

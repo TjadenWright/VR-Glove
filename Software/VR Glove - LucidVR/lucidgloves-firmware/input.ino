@@ -316,12 +316,6 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
   }
   
   for (int i = 0; i < 2*NUM_FINGERS; i++){
-  if (i == target){
-    targetFlexionMin = minFingers[i];
-    targetFlexionMax = maxFingers[i];
-    targetFlexionCurrent = rawFingers[i];
-    targetMaxTravel = maxTravel[i];
-  }
     if (minFingers[i] != maxFingers[i]){
       #if !CLAMP_SENSORS_DISCARD
       fingerPos[i] = map( rawFingers[i], minFingers[i], maxFingers[i], 0, ANALOG_MAX );
@@ -331,8 +325,6 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
         fingerPos[i] = map( rawFingers[i], minFingers[i], maxFingers[i], 0, ANALOG_MAX );
       }
       #endif
-      if (i == target)
-        targetProcessed = fingerPos[i];
       #if CLAMP_ANALOG_MAP
         if (fingerPos[i] < 0)
           fingerPos[i] = 0;

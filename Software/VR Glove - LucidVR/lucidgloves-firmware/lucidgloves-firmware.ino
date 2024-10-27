@@ -12,12 +12,16 @@
 //CONFIGURATION SETTINGS:
 //#define ESP32S3 // Hack to workaround pin32 issue. Uncomment if you have an ESP32S3.
 //#define NEOPIXEL //Is the DEBUG_LED a WS2812? 
-#define COMMUNICATION COMM_BLESERIAL //Which communication protocol to use. Options are: COMM_SERIAL (usb), COMM_BTSERIAL (bluetooth), COMM_BLESERIAL (BLE Serial, using Nordic UART Service)
+#define COMMUNICATION COMM_UWBSERIAL //Which communication protocol to use. Options are: COMM_SERIAL (usb), COMM_BTSERIAL (bluetooth), COMM_BLESERIAL (BLE Serial, using Nordic UART Service)
 //serial over USB
   #define SERIAL_BAUD_RATE 115200
   
 //serial over Bluetooth
   #define BTSERIAL_DEVICE_NAME "lucidgloves-left"
+
+//uwb
+  #define UWBSERIAL_DEVICE_ADDRESS 5
+  #define UWBSERIAL_NETWORK_ID     10
 
 //ANALOG INPUT CONFIG
 #define USING_SPLAY true //whether or not your glove tracks splay. - tracks the side to side "wag" of fingers. Requires 5 more inputs.
@@ -103,7 +107,7 @@
   #define PINS_MUX_SELECT     18,  /*S0 pin*/ \
                               25,  /*S1 pin*/ \
                               26,  /*S2 pin*/ \
-                              27   /*S3 pin (if your mux is 3-bit like 74HC4051 then you can remove this line and the backslash before it.)*/
+                              17 //27   /*S3 pin (if your mux is 3-bit like 74HC4051 then you can remove this line and the backslash before it.)*/
   
   #define MUX_INPUT 32  //the input or SIG pin of the multiplexer. This can't be a mux pin.
 

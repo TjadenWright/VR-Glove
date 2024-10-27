@@ -64,16 +64,19 @@ void setup() {
   #else   
   digitalWrite(DEBUG_LED, HIGH); 
   #endif 
+
+  setupInputs();
+
   #if COMMUNICATION == COMM_SERIAL
     comm = new SerialCommunication();
   #elif COMMUNICATION == COMM_BTSERIAL
     comm = new BTSerialCommunication();
   #elif COMMUNICATION == COMM_BLESERIAL
     comm = new BLESerialCommunication();
+  #elif COMMUNICATION == COMM_UWBSERIAL
+    comm = new UWBSerialCommunication();
   #endif  
   comm->start();
-
-  setupInputs();
 
   #if USING_FORCE_FEEDBACK
     setupServoHaptics();  
@@ -97,25 +100,11 @@ int mainMicros = 0;
 int mainMicrosTotal = 0;
 int mainloops = 1;
 
-int target = 0;
-bool latch = false;
-
 void loop() {
   mainloops++;
   mainMicros = micros() - lastMainMicros;
   mainMicrosTotal += mainMicros;
   lastMainMicros = micros();
-
-  if (!digitalRead(27)){
-    if (!latch){
-       target++;
-       target %= 5;
-
-       latch = true;
-    }
-  }
-  else
-    latch = false;
   
   if (comm->isOpen()){
     #if !USING_TWO_CALIB_PINS

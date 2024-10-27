@@ -31,21 +31,15 @@ const uint8_t PIN_IRQ = 34; // irq pin
 const uint8_t PIN_SS = 4; // spi select pin
 
 // DEBUG packet sent status and count
-boolean sent = false;
 volatile boolean sentAck = false;
-volatile unsigned long delaySent = 0;
-int16_t sentNum = 1234; // todo check int type
+char* msg_input = "A2465B2474C2450D2447E2463F2047G1618P854ILM(AB)2481(BB)1881(CB)1818(DB)1857(EB)1861";
 DW1000Time sentTime;
-
-#include <light_CD74HC4067.h>
-CD74HC4067 mux(18, 25, 26, 23);  // create a new CD74HC4067 object with its four select lines - 8,9,10,11
-const int signal_pin = 32; // Pin A0 - Connected to Sig pin of CD74HC4067
 
 void setup() {
   // DEBUG monitoring
   Serial.begin(115200);
+  delay(1000);
   Serial.println(F("### DW1000-arduino-sender-test ###"));
-  pinMode(signal_pin, INPUT); // Set as input for reading through signal pin
   // initialize the driver
   DW1000.begin(PIN_IRQ, PIN_RST);
   DW1000.select(PIN_SS);
@@ -69,54 +63,39 @@ void setup() {
   DW1000.getPrintableDeviceMode(msg);
   Serial.print("Device mode: "); Serial.println(msg);
   // attach callback for (successfully) sent messages
-  DW1000.attachSentHandler(handleSent);
+  //DW1000.attachSentHandler(handleSent);
   // start a transmission
-  transmitter();
+  output(msg_input);
 }
 
-void handleSent() {
-  // status change on sent success
-  sentAck = true;
-}
+// void handleSent() {
+//   // status change on sent success
+//   sentAck = true;
+// }
 
-void transmitter() {
+void output(char* data) {
   // transmit some data
-  //Serial.print("Transmitting packet ... #"); Serial.println(sentNum);
   DW1000.newTransmit();
   DW1000.setDefaults();
-  String msg = "A2465B2474C2450D2447E2463F2047G1618P854ILM(AB)2481(BB)1881(CB)1818(DB)1857(EB)1861";
-  DW1000.setData(msg);
+  DW1000.setData(data);
   // delay sending the message for the given amount
-  //DW1000Time deltaTime = DW1000Time(3, DW1000Time::MILLISECONDS);
-  //DW1000.setDelay(deltaTime);
   DW1000.startTransmit();
-  //delaySent = millis();
 }
 
 void loop() {
-  if (!sentAck) {
-    return;
-  }
+  // if (!sentAck) {
+  //   return;
+  // }
   // continue on success confirmation
   // (we are here after the given amount of send delay time has passed)
-  sentAck = false;
+  //sentAck = false;
   // update and print some information about the sent message
-  //Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
   DW1000Time newSentTime;
   DW1000.getTransmitTimestamp(newSentTime);
-  //Serial.print("Processed packet ... #"); Serial.println(sentNum);
-  //Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
   // note: delta is just for simple demo as not correct on system time counter wrap-around
   Serial.print("DW1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
   sentTime = newSentTime;
-  sentNum++;
-
-  for (byte i = 0; i < 16; i++) {
-    mux.channel(i);
-    int val = analogRead(signal_pin);                       // Read analog value
-    //Serial.println("Channel "+String(i)+": "+String(val));  // Print value
-  }
 
   // again, transmit some data
-  transmitter();
+  output(msg_input);
 }

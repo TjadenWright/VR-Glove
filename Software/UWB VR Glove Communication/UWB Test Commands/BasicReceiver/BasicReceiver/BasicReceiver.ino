@@ -88,6 +88,17 @@ void receiver() {
   DW1000.startReceive();
 }
 
+void cleanString(String data) {
+    int len = data.length();
+    int j = 0;
+    for (int i = 0; i < len; i++) {
+        if (data[i] >= 32 && data[i] <= 126) {
+            data[j++] = data[i];
+        }
+    }
+    data[j] = '\0';
+}
+
 void loop() {
   // enter on confirmation of ISR status change (successfully received)
   if (received) {
@@ -95,7 +106,8 @@ void loop() {
     // get data as string
     DW1000.getData(message);
     // Serial.print("Received message ... #"); Serial.println(numReceived);
-    Serial.println(message);
+    cleanString(message);
+    Serial.print(message);
     // Serial.print("FP power is [dBm] ... "); Serial.println(DW1000.getFirstPathPower());
     // Serial.print("RX power is [dBm] ... "); Serial.println(DW1000.getReceivePower());
     // Serial.print("Signal quality is ... "); Serial.println(DW1000.getReceiveQuality());
