@@ -30,8 +30,6 @@
 
 
 #define MULTIPLEXER_DELAY   5 //How many microseconds should be delayed between multiplexer reads
-#define USE_CD74HC4067_MUX false // use the library (this makes uwb work!)
-
 
 //ANALOG_MAX OVERRIDE:
 //#define ANALOG_MAX 4095 //uncomment and set as needed
