@@ -337,43 +337,6 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
     }
     
   }
-
-  /*
-  Serial.println("-----------------------------------------------------------------------------------------------------------------");
-  Serial.print("min thumb: "); Serial.print(minFingers[0]); Serial.print(" min pointer: "); Serial.print(minFingers[1]); Serial.print(" min middle: "); Serial.print(minFingers[2]); Serial.print(" min index: "); Serial.print(minFingers[3]); Serial.print(" min pinky: "); Serial.println(minFingers[4]);
-  Serial.print("max thumb: "); Serial.print(maxFingers[0]); Serial.print(" max pointer: "); Serial.print(maxFingers[1]); Serial.print(" max middle: "); Serial.print(maxFingers[2]); Serial.print(" max index: "); Serial.print(maxFingers[3]); Serial.print(" max pinky: "); Serial.println(maxFingers[4]);
-  Serial.println("-----------------------------------------------------------------------------------------------------------------");
-  Serial.print("thumb: "); Serial.print(rawFingersFlexion[0]); Serial.print(" pointer: "); Serial.print(rawFingersFlexion[1]); Serial.print(" middle: "); Serial.print(rawFingersFlexion[2]); Serial.print(" index: "); Serial.print(rawFingersFlexion[3]); Serial.print(" pinky: "); Serial.println(rawFingersFlexion[4]);
-  */
-  
-  /*
-  Serial.print(target);
-  Serial.print(" ");
-  Serial.print(targetSinMin);
-  Serial.print(" ");
-  Serial.print(targetSinMax);
-  Serial.print(" ");
-  Serial.print(targetSinCurrent);
-  Serial.print(" ");
-  Serial.print(targetCosMin);
-  Serial.print(" ");
-  Serial.print(targetCosMax);
-  Serial.print(" ");
-  Serial.print(targetCosCurrent);
-  Serial.print(" ");
-  Serial.print(targetFlexionMin);
-  Serial.print(" ");
-  Serial.print(targetFlexionMax);
-  Serial.print(" ");
-  Serial.print(targetFlexionCurrent);
-  Serial.print(" ");
-  Serial.print(targetMaxTravel);
-  Serial.print(" ");
-  Serial.print(targetProcessed);
-
-  Serial.println();
-  Serial.flush();
-  */
 }
 
 int analogReadDeadzone(int pin){

@@ -9,7 +9,7 @@
 #define NUM_FINGERS 5
 
 //Bluetooth advaned settings
-#define BT_ECHO true//Should the bluetooth data be echoed over serial for debugging
+#define BT_ECHO true //Should the bluetooth data be echoed over serial for debugging
 
 //ESP32 Specific Settings
 #define ESP32_DUAL_CORE false //Should inputs be handled on a separate core for communication for more accurate rotation counting

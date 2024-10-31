@@ -81,12 +81,12 @@
   #define PIN_JOY_BTN   14
   #define PIN_A_BTN     12 
   #define PIN_B_BTN     13
-  #define PIN_TRIG_BTN  21 //unused if gesture set
-  #define PIN_GRAB_BTN  21 //unused if gesture set
-  #define PIN_PNCH_BTN  21 //unused if gesture set
-  #define PIN_CALIB     21 //button for recalibration (You can set this to GPIO0 to use the BOOT button, but only when using Bluetooth.)
+  #define PIN_TRIG_BTN  19 //unused if gesture set
+  #define PIN_GRAB_BTN  19 //unused if gesture set
+  #define PIN_PNCH_BTN  19 //unused if gesture set
+  #define PIN_CALIB     19 //button for recalibration (You can set this to GPIO0 to use the BOOT button, but only when using Bluetooth.)
   #define PIN_CALIB_FLEX  22
-  #define PIN_CALIB_SPLAY 23
+  #define PIN_CALIB_SPLAY 15
   #define DEBUG_LED 2
   #define PIN_PINKY_MOTOR     16  //used for force feedback
   #define PIN_RING_MOTOR      16 //^
@@ -104,10 +104,10 @@
   
 
   //Select pins for multiplexers, set as needed if using a mux. You can add or remove pins as needed depending on how many select pins your mux needs.
-  #define PINS_MUX_SELECT     18,  /*S0 pin*/ \
+  #define PINS_MUX_SELECT     5,  /*S0 pin*/ \
                               25,  /*S1 pin*/ \
                               26,  /*S2 pin*/ \
-                              17 //27   /*S3 pin (if your mux is 3-bit like 74HC4051 then you can remove this line and the backslash before it.)*/
+                              21   /*S3 pin (if your mux is 3-bit like 74HC4051 then you can remove this line and the backslash before it.)*/
   
   #define MUX_INPUT 32  //the input or SIG pin of the multiplexer. This can't be a mux pin.
 
@@ -157,7 +157,7 @@
   #define PINS_MUX_SELECT     10,  /*S0 pin*/ \
                               11,  /*S1 pin*/ \
                               12,  /*S2 pin*/ \
-                              13   /*S3 pin (if your mux is 3-bit like 74HC4051 then you can remove this line and the backslash before it.)*/
+                              35   /*S3 pin (if your mux is 3-bit like 74HC4051 then you can remove this line and the backslash before it.)*/
   
   #define MUX_INPUT A0  //the input or SIG pin of the multiplexer. This can't be a mux pin.
 

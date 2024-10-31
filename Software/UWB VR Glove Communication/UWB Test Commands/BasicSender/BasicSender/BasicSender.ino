@@ -35,7 +35,19 @@ volatile boolean sentAck = false;
 char* msg_input = "A2465B2474C2450D2447E2463F2047G1618P854ILM(AB)2481(BB)1881(CB)1818(DB)1857(EB)1861";
 DW1000Time sentTime;
 
+#include <light_CD74HC4067.h>
+
+
+            // s0 s1 s2 s3: select pins
+CD74HC4067 mux(5, 25, 26, 21);  // create a new CD74HC4067 object with its four select lines - 8,9,10,11
+
+
+const int signal_pin = 32; // Pin A0 - Connected to Sig pin of CD74HC4067
+int val[16]; 
+
 void setup() {
+  pinMode(signal_pin, INPUT); // Set as input for reading through signal pin
+
   // DEBUG monitoring
   Serial.begin(115200);
   delay(1000);
@@ -63,15 +75,15 @@ void setup() {
   DW1000.getPrintableDeviceMode(msg);
   Serial.print("Device mode: "); Serial.println(msg);
   // attach callback for (successfully) sent messages
-  //DW1000.attachSentHandler(handleSent);
+  DW1000.attachSentHandler(handleSent);
   // start a transmission
   output(msg_input);
 }
 
-// void handleSent() {
-//   // status change on sent success
-//   sentAck = true;
-// }
+void handleSent() {
+  // status change on sent success
+  sentAck = true;
+}
 
 void output(char* data) {
   // transmit some data
@@ -83,12 +95,18 @@ void output(char* data) {
 }
 
 void loop() {
-  // if (!sentAck) {
-  //   return;
-  // }
+  if (!sentAck) {
+    return;
+  }
   // continue on success confirmation
   // (we are here after the given amount of send delay time has passed)
-  //sentAck = false;
+  sentAck = false;
+  for (byte i = 0; i < 16; i++) {
+    mux.channel(i);
+    val[i] = analogRead(signal_pin);                       // Read analog value
+    Serial.println("Channel "+String(i)+": "+String(val[i]));  // Print value
+    delayMicroseconds(5);
+  }
   // update and print some information about the sent message
   DW1000Time newSentTime;
   DW1000.getTransmitTimestamp(newSentTime);
@@ -96,6 +114,10 @@ void loop() {
   Serial.print("DW1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
   sentTime = newSentTime;
 
+  static char stringToEncode[75];
+  sprintf(stringToEncode, "A%dB%dC%dD%dE%dF%dG%dP%d%s%s%s%s%s%s%s%s(AB)%d(BB)%d(CB)%d(DB)%d(EB)%d\n", 
+                          val[13], val[10], val[7], val[4], val[1], val[14], val[15], 0, "", "", "", "", "", "", "", "",
+                          val[12], val[9], val[6], val[3], val[0]); 
   // again, transmit some data
-  output(msg_input);
+  output(stringToEncode);
 }
