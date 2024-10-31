@@ -88,15 +88,37 @@ void receiver() {
   DW1000.startReceive();
 }
 
-void cleanString(String data) {
-    int len = data.length();
-    int j = 0;
-    for (int i = 0; i < len; i++) {
-        if (data[i] >= 32 && data[i] <= 126) {
-            data[j++] = data[i];
+String extractSubstring(String input, char startChar, char endChar) {
+    int startIndex = input.indexOf(startChar);
+    int endIndex = input.indexOf(endChar, startIndex + 1);
+
+    if (startIndex == -1 || endIndex == -1) {
+        return ""; // Return empty string if start or end character is not found
+    }
+
+    return input.substring(startIndex, endIndex); // Include the end character
+}
+
+bool isLetter(char c) {
+    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+String extractNumberAfterLetter(String input, char letter) {
+    int startIndex = input.indexOf(letter);
+    if (startIndex == -1) {
+        return ""; // Letter not found in the string
+    }
+
+    String result = "";
+    for (int i = startIndex + 1; i < input.length(); i++) {
+        if (isDigit(input[i])) {
+            result += input[i];
+        } else if (isLetter(input[i])) {
+            break; // Stop when the next letter is encountered
         }
     }
-    data[j] = '\0';
+
+    return result;
 }
 
 void loop() {
@@ -106,8 +128,13 @@ void loop() {
     // get data as string
     DW1000.getData(message);
     // Serial.print("Received message ... #"); Serial.println(numReceived);
-    cleanString(message);
-    Serial.print(message);
+    String cleanMessage = extractSubstring(message, 'A', 'Q');
+    cleanMessage = cleanMessage + "(AB)" + String(extractNumberAfterLetter(message, 'Q'));
+    cleanMessage = cleanMessage + "(BB)" + String(extractNumberAfterLetter(message, 'R'));
+    cleanMessage = cleanMessage + "(CB)" + String(extractNumberAfterLetter(message, 'S'));
+    cleanMessage = cleanMessage + "(DB)" + String(extractNumberAfterLetter(message, 'T'));
+    cleanMessage = cleanMessage + "(EB)" + String(extractNumberAfterLetter(message, 'U'));
+    Serial.println(cleanMessage);
     // Serial.print("FP power is [dBm] ... "); Serial.println(DW1000.getFirstPathPower());
     // Serial.print("RX power is [dBm] ... "); Serial.println(DW1000.getReceivePower());
     // Serial.print("Signal quality is ... "); Serial.println(DW1000.getReceiveQuality());
