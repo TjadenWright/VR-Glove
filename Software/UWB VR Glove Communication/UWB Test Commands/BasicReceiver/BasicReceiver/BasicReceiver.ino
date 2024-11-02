@@ -23,6 +23,10 @@
  *  
  */
 
+#define UWBSERIAL_DEVICE_ADDRESS 6
+#define UWBSERIAL_NETWORK_ID     10
+#define UWB_CHANNEL              4
+
 #include <SPI.h>
 #include <DW1000.h>
 
@@ -48,8 +52,9 @@ void setup() {
   // general configuration
   DW1000.newConfiguration();
   DW1000.setDefaults();
-  DW1000.setDeviceAddress(6);
-  DW1000.setNetworkId(10);
+  DW1000.setDeviceAddress(UWBSERIAL_DEVICE_ADDRESS);
+  DW1000.setNetworkId(UWBSERIAL_NETWORK_ID);
+  DW1000.setChannel(UWB_CHANNEL);
   DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
   DW1000.commitConfiguration();
   Serial.println(F("Committed configuration ..."));

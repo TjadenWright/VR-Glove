@@ -36,6 +36,7 @@ class UWBSerialCommunication : public ICommunication {
       DW1000.setDefaults();
       DW1000.setDeviceAddress(UWBSERIAL_DEVICE_ADDRESS);
       DW1000.setNetworkId(UWBSERIAL_NETWORK_ID);
+      DW1000.setChannel(UWB_CHANNEL);
       DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
       DW1000.commitConfiguration();
 

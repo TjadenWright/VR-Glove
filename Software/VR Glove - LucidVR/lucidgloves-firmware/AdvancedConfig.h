@@ -9,7 +9,7 @@
 #define NUM_FINGERS 5
 
 //Bluetooth advaned settings
-#define BT_ECHO true //Should the bluetooth data be echoed over serial for debugging
+#define BT_ECHO false //Should the bluetooth data be echoed over serial for debugging
 
 //ESP32 Specific Settings
 #define ESP32_DUAL_CORE false //Should inputs be handled on a separate core for communication for more accurate rotation counting
@@ -37,6 +37,12 @@
 #ifndef ANALOG_MAX
 #error "This board doesn't have an auto ANALOG_MAX assignment, please set it manually by uncommenting the line below ANALOG_MAX OVERRIDE in AdvancedConfig.h"
 #endif
+
+#define JOYSTICK_MAPPING true // allows joystick to go from 0-3.3v if it can't
+#define JOYSTICK_X_MAX 3070
+#define JOYSTICK_X_MIN 760
+#define JOYSTICK_Y_MAX 2650
+#define JOYSTICK_Y_MIN 460
 
 //Filtering and clamping analog inputs
 #define CLAMP_ANALOG_MAP true //clamp the mapped analog values from 0 to ANALOG_MAX

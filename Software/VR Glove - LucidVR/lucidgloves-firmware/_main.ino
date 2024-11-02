@@ -65,6 +65,8 @@ void setup() {
   digitalWrite(DEBUG_LED, HIGH); 
   #endif 
 
+  //Serial.begin(SERIAL_BAUD_RATE);
+
   setupInputs();
 
   #if COMMUNICATION == COMM_SERIAL
@@ -134,7 +136,7 @@ void loop() {
       calibSplay = getButton(PIN_CALIB_SPLAY) != INVERT_CALIB_SPLAY;
       
       // calibration button setup
-      if(((calibFlex != calibFlexPrev) && (calibFlexPrev = 0)) || ((calibSplay != calibSplayPrev) && (calibSplayPrev = 0))){
+      if(((calibFlex != calibFlexPrev) && (calibFlexPrev == 0)) || ((calibSplay != calibSplayPrev) && (calibSplayPrev == 0))){
         // if one of the buttons was just pressed set reset mode
         calibButton = true;  // reset
         calibrate = false;   // don't calibrate quite yet
@@ -161,7 +163,7 @@ void loop() {
         splayCalib = false;  // not splay mode
       }
     #endif
-
+    
     #if !ESP32_DUAL_CORE_SET
       getFingerPositions(calibrate, calibButton, flexionCalib, splayCalib);
     #endif

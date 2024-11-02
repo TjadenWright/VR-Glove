@@ -22,6 +22,7 @@
 //uwb
   #define UWBSERIAL_DEVICE_ADDRESS 5
   #define UWBSERIAL_NETWORK_ID     10
+  #define UWB_CHANNEL              4
 
 //ANALOG INPUT CONFIG
 #define USING_SPLAY true //whether or not your glove tracks splay. - tracks the side to side "wag" of fingers. Requires 5 more inputs.

@@ -22,6 +22,11 @@ Preferences prefs;
       RunningMedian(MEDIAN_SAMPLES),
       RunningMedian(MEDIAN_SAMPLES)
   };
+
+  RunningMedian rmSamplesJoystick[2] = {
+      RunningMedian(MEDIAN_SAMPLES),
+      RunningMedian(MEDIAN_SAMPLES),
+  };
 #endif
 
 #if ((INTERFILTER_MODE != INTERFILTER_NONE) && (FLEXION_MIXING == MIXING_SINCOS))
@@ -341,19 +346,50 @@ void getFingerPositions(bool calibrating, bool reset, bool flexion, bool splay){
 
 int analogReadDeadzone(int pin){
   int raw = analogPinRead(pin);
+
+  #if ENABLE_MEDIAN_FILTER
+    if(pin == PIN_JOY_X){
+      rmSamplesJoystick[0].add(raw);
+      raw = rmSamplesJoystick[0].getMedian();
+    }
+    else{
+      rmSamplesJoystick[1].add(raw);
+      raw = rmSamplesJoystick[1].getMedian();
+    }
+  #endif
+
   if (abs(ANALOG_MAX/2 - raw) < JOYSTICK_DEADZONE * ANALOG_MAX / 100)
     return ANALOG_MAX/2;
-  else
+  else{
+    #if JOYSTICK_MAPPING
+      // map the pins
+      if(pin == PIN_JOY_X){ // x
+        raw = map(raw, JOYSTICK_X_MIN, JOYSTICK_X_MAX, 0, ANALOG_MAX );
+      }
+      else{ // y
+        raw = map(raw, JOYSTICK_Y_MIN, JOYSTICK_Y_MAX, 0, ANALOG_MAX );
+      }
+      
+      // check if outside bounds, if so clamp
+      if(raw > ANALOG_MAX || raw < 0){ // keep within bounds
+        if(raw < 0)
+          raw = 0;
+        else
+          raw = ANALOG_MAX;
+      }
+    #endif
+    
     return raw;
+  }
 }
 
 int getJoyX(){
   #if JOYSTICK_BLANK
   return ANALOG_MAX/2;
   #elif JOY_FLIP_X
-  return ANALOG_MAX - analogReadDeadzone(PIN_JOY_X);
+    return ANALOG_MAX - analogReadDeadzone(PIN_JOY_X);
   #else
-  return analogReadDeadzone(PIN_JOY_X);
+    return analogReadDeadzone(PIN_JOY_X);
   #endif
 }
 
@@ -361,9 +397,9 @@ int getJoyY(){
   #if JOYSTICK_BLANK
   return ANALOG_MAX/2;
   #elif JOY_FLIP_Y
-  return ANALOG_MAX - analogReadDeadzone(PIN_JOY_Y);
+    return ANALOG_MAX - analogReadDeadzone(PIN_JOY_Y);
   #else
-  return analogReadDeadzone(PIN_JOY_Y);
+    return analogReadDeadzone(PIN_JOY_Y);
   #endif
 }
 

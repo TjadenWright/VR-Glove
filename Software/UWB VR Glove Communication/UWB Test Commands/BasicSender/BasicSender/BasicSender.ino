@@ -22,6 +22,12 @@
  *  - move strings to flash (less RAM consumption)
  *  
  */
+
+//uwb
+#define UWBSERIAL_DEVICE_ADDRESS 5
+#define UWBSERIAL_NETWORK_ID     10
+#define UWB_CHANNEL              5
+
 #include <SPI.h>
 #include <DW1000.h>
 
@@ -35,18 +41,7 @@ volatile boolean sentAck = false;
 char* msg_input = "A2465B2474C2450D2447E2463F2047G1618P854ILM(AB)2481(BB)1881(CB)1818(DB)1857(EB)1861";
 DW1000Time sentTime;
 
-#include <light_CD74HC4067.h>
-
-
-            // s0 s1 s2 s3: select pins
-CD74HC4067 mux(5, 25, 26, 21);  // create a new CD74HC4067 object with its four select lines - 8,9,10,11
-
-
-const int signal_pin = 32; // Pin A0 - Connected to Sig pin of CD74HC4067
-int val[16]; 
-
 void setup() {
-  pinMode(signal_pin, INPUT); // Set as input for reading through signal pin
 
   // DEBUG monitoring
   Serial.begin(115200);
@@ -59,13 +54,14 @@ void setup() {
   // general configuration
   DW1000.newConfiguration();
   DW1000.setDefaults();
-  DW1000.setDeviceAddress(5);
-  DW1000.setNetworkId(10);
+  DW1000.setDeviceAddress(UWBSERIAL_DEVICE_ADDRESS);
+  DW1000.setNetworkId(UWBSERIAL_NETWORK_ID);
+  DW1000.setChannel(UWB_CHANNEL);
   DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
   DW1000.commitConfiguration();
   Serial.println(F("Committed configuration ..."));
   // DEBUG chip info and registers pretty printed
-  char msg[2048];
+  char msg[128];
   DW1000.getPrintableDeviceIdentifier(msg);
   Serial.print("Device ID: "); Serial.println(msg);
   DW1000.getPrintableExtendedUniqueIdentifier(msg);
@@ -101,12 +97,6 @@ void loop() {
   // continue on success confirmation
   // (we are here after the given amount of send delay time has passed)
   sentAck = false;
-  for (byte i = 0; i < 16; i++) {
-    mux.channel(i);
-    val[i] = analogRead(signal_pin);                       // Read analog value
-    Serial.println("Channel "+String(i)+": "+String(val[i]));  // Print value
-    delayMicroseconds(5);
-  }
   // update and print some information about the sent message
   DW1000Time newSentTime;
   DW1000.getTransmitTimestamp(newSentTime);
@@ -114,10 +104,6 @@ void loop() {
   Serial.print("DW1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
   sentTime = newSentTime;
 
-  static char stringToEncode[75];
-  sprintf(stringToEncode, "A%dB%dC%dD%dE%dF%dG%dP%d%s%s%s%s%s%s%s%s(AB)%d(BB)%d(CB)%d(DB)%d(EB)%d\n", 
-                          val[13], val[10], val[7], val[4], val[1], val[14], val[15], 0, "", "", "", "", "", "", "", "",
-                          val[12], val[9], val[6], val[3], val[0]); 
   // again, transmit some data
-  output(stringToEncode);
+  output(msg_input);
 }
