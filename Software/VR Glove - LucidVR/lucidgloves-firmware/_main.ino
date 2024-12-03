@@ -163,6 +163,8 @@ void loop() {
         splayCalib = false;  // not splay mode
       }
     #endif
+
+    // Serial.print("Calib Flex: "); Serial.print(calibFlex); Serial.print(" Calib Splay: "); Serial.print(calibSplay);
     
     #if !ESP32_DUAL_CORE_SET
       getFingerPositions(calibrate, calibButton, flexionCalib, splayCalib);

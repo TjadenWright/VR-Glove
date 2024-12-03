@@ -21,12 +21,12 @@
  * @todo
  *  - move strings to flash (less RAM consumption)
  *  
- * Edited: Tjaden Wright - Added support for LucidGlove firmware (Left Glove).
+ * Edited: Tjaden Wright - Added support for LucidGlove firmware (Right Glove).
  */
 
 #define UWBSERIAL_DEVICE_ADDRESS 5
 #define UWBSERIAL_NETWORK_ID     10
-#define UWB_CHANNEL              4
+#define UWB_CHANNEL              5
 
 #include <SPI.h>
 #include <DW1000.h>
