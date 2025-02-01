@@ -2,7 +2,7 @@
  * LucidGloves Firmware Version 5
  * Author: Lucas_VRTech - LucidVR
  * lucidvrtech.com
- * Edited: Tjaden Wright - Added UWB support (Left Glove)
+ * Edited: Tjaden Wright - Added UWB support (Right Glove)
  */
 
 #include "ConfigUtils.h"
@@ -17,18 +17,18 @@
   #define SERIAL_BAUD_RATE 115200
   
 //serial over Bluetooth
-  #define BTSERIAL_DEVICE_NAME "lucidgloves-left"
+  #define BTSERIAL_DEVICE_NAME "lucidgloves-right"
 
 //uwb
   #define UWBSERIAL_DEVICE_ADDRESS 5
   #define UWBSERIAL_NETWORK_ID     10
-  #define UWB_CHANNEL              4
+  #define UWB_CHANNEL              5
 
 //ANALOG INPUT CONFIG
 #define USING_SPLAY true //whether or not your glove tracks splay. - tracks the side to side "wag" of fingers. Requires 5 more inputs.
 #define USING_MULTIPLEXER true //Whether or not you are using a multiplexer for inputs
 #define FLIP_FLEXION  false  //Flip values from potentiometers (for fingers!) if they are backwards
-#define FLIP_SPLAY true //Flip values for splay
+#define FLIP_SPLAY false //Flip values for splay
 
 //Gesture enables, make false to use button override
 #define TRIGGER_GESTURE true
@@ -46,7 +46,7 @@
 #define INVERT_MENU false
 #define MENU_BUTTON_AB true // makes A + B button the menu button
 #define INVERT_CALIB false
-#define INVERT_CALIB_FLEX true
+#define INVERT_CALIB_FLEX false
 #define INVERT_CALIB_SPLAY false
 //These only apply with gesture button override:
 #define INVERT_TRIGGER false
@@ -56,8 +56,8 @@
 
 //joystick configuration
 #define JOYSTICK_BLANK false //make true if not using the joystick
-#define JOY_FLIP_X false
-#define JOY_FLIP_Y false
+#define JOY_FLIP_X true
+#define JOY_FLIP_Y true
 #define JOYSTICK_DEADZONE 10 //deadzone in the joystick to prevent drift (in percent)
 
 #define NO_THUMB false //If for some reason you don't want to track the thumb
@@ -72,13 +72,13 @@
 #if defined(ESP32)
   //(This configuration is for ESP32 DOIT V1 so make sure to change if you're on another board)
   //To use a pin on the multiplexer, use MUX(pin). So for example pin 15 on a mux would be MUX(15).
-  #define PIN_PINKY     MUX(1) //These 5 are for flexion
-  #define PIN_RING      MUX(4)
-  #define PIN_MIDDLE    MUX(7)
-  #define PIN_INDEX     MUX(10)
-  #define PIN_THUMB     MUX(13)
-  #define PIN_JOY_X     MUX(14)
-  #define PIN_JOY_Y     MUX(15)
+  #define PIN_PINKY     MUX(14) //These 5 are for flexion
+  #define PIN_RING      MUX(11)
+  #define PIN_MIDDLE    MUX(8)
+  #define PIN_INDEX     MUX(5)
+  #define PIN_THUMB     MUX(2)
+  #define PIN_JOY_X     MUX(1)
+  #define PIN_JOY_Y     MUX(0)
   #define PIN_JOY_BTN   14
   #define PIN_A_BTN     12 
   #define PIN_B_BTN     13
@@ -97,11 +97,11 @@
   #define PIN_MENU_BTN        19
 
   //Splay pins. Only used for splay tracking gloves. Use MUX(pin) if you are using a multiplexer for it.
-  #define PIN_PINKY_SPLAY  MUX(0)
-  #define PIN_RING_SPLAY   MUX(3)
-  #define PIN_MIDDLE_SPLAY MUX(6)
-  #define PIN_INDEX_SPLAY  MUX(9)
-  #define PIN_THUMB_SPLAY  MUX(12)
+  #define PIN_PINKY_SPLAY  MUX(15)
+  #define PIN_RING_SPLAY   MUX(12)
+  #define PIN_MIDDLE_SPLAY MUX(9)
+  #define PIN_INDEX_SPLAY  MUX(6)
+  #define PIN_THUMB_SPLAY  MUX(3)
   
 
   //Select pins for multiplexers, set as needed if using a mux. You can add or remove pins as needed depending on how many select pins your mux needs.
@@ -116,11 +116,11 @@
   //For double rotary hall effect sensors use MIXING_SINCOS. For potentiometers use MIXING_NONE.
   #define FLEXION_MIXING MIXING_NONE
     //Secondary analog pins for mixing flexion values. Only used by MIXING_SINCOS. Use MUX(pin) if you are using a multiplexer for it.
-    #define PIN_PINKY_SECOND     MUX(2) 
-    #define PIN_RING_SECOND      MUX(2)
-    #define PIN_MIDDLE_SECOND    MUX(2)
-    #define PIN_INDEX_SECOND     MUX(2)
-    #define PIN_THUMB_SECOND     MUX(2)
+    #define PIN_PINKY_SECOND     MUX(13) 
+    #define PIN_RING_SECOND      MUX(13)
+    #define PIN_MIDDLE_SECOND    MUX(13)
+    #define PIN_INDEX_SECOND     MUX(13)
+    #define PIN_THUMB_SECOND     MUX(13)
   
 //PINS CONFIGURATION 
 #elif defined(__AVR__)
